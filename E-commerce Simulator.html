@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redesigned Conversion Calculator</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    }
+    header {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 1.5em;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      margin: 20px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .column {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+    h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 5px;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.1);
+      color: #333;
+      backdrop-filter: blur(6px);
+    }
+    button {
+      padding: 12px 20px;
+      background: linear-gradient(90deg, #007bff, #0056b3);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+      font-size: 1em;
+      width: 200px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #0056b3, #003d80);
+    }
+    .results {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 0 20px;
+    }
+    .result {
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      color: #333;
+      backdrop-filter: blur(10px);
+    }
+    .switch {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .switch input {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>Conversion Calculator</header>
+
+  <div class="container">
+    <div class="column">
+      <h3>Traffic</h3>
+      <input type="number" id="traffic" placeholder="What's your traffic?">
+      <input type="number" id="cpc" placeholder="What's your CPC?">
+    </div>
+
+    <div class="column">
+      <h3>Landing Page</h3>
+      <div class="switch">
+        <label>Enable Landing Page</label>
+        <input type="checkbox" id="landingSwitch" checked>
+      </div>
+      <input type="number" id="ctr" placeholder="What's your CTR?">
+    </div>
+
+    <div class="column">
+      <h3>Sales Page</h3>
+      <input type="number" id="productPrice" placeholder="Product Price">
+      <input type="number" id="productCost" placeholder="Product Cost">
+      <input type="number" id="conversionRate" placeholder="Conversion Rate %">
+    </div>
+
+    <div class="column">
+      <h3>Upsell</h3>
+      <div class="switch">
+        <label>Enable Upsell</label>
+        <input type="checkbox" id="upsellSwitch" checked>
+      </div>
+      <input type="number" id="upsellPrice" placeholder="Product Price">
+      <input type="number" id="upsellCost" placeholder="Product Cost">
+      <input type="number" id="upsellConversionRate" placeholder="Conversion Rate %">
+    </div>
+
+    <div class="column">
+      <h3>Additional Costs</h3>
+      <input type="number" id="callCenterRate" placeholder="Call center confirmation Rate %">
+      <input type="number" id="callCenterCost" placeholder="Call center order confirmation cost">
+      <input type="number" id="shippingDeliverability" placeholder="Shipping deliverability">
+      <input type="number" id="shippingCost" placeholder="Shipping cost">
+    </div>
+  </div>
+
+  <button id="calculate">Calculate</button>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    // Get the input elements
+    let trafficInput = document.getElementById('traffic');
+    let cpcInput = document.getElementById('cpc');
+    let ctrInput = document.getElementById('ctr');
+    let productPriceInput = document.getElementById('productPrice');
+    let productCostInput = document.getElementById('productCost');
+    let conversionRateInput = document.getElementById('conversionRate');
+    let upsellPriceInput = document.getElementById('upsellPrice');
+    let upsellCostInput = document.getElementById('upsellCost');
+    let upsellConversionRateInput = document.getElementById('upsellConversionRate');
+    let callCenterRateInput = document.getElementById('callCenterRate');
+    let callCenterCostInput = document.getElementById('callCenterCost');
+    let shippingDeliverabilityInput = document.getElementById('shippingDeliverability');
+    let shippingCostInput = document.getElementById('shippingCost');
+    let landingSwitch = document.getElementById('landingSwitch');
+    let upsellSwitch = document.getElementById('upsellSwitch');
+    let resultsDiv = document.getElementById('results');
+
+    function calculateResults() {
+      // Get values from inputs
+      const traffic = parseFloat(trafficInput.value) || 0;
+      const cpc = parseFloat(cpcInput.value) || 0;
+      const ctr = landingSwitch.checked ? parseFloat(ctrInput.value) || 0 : 0;
+      const productPrice = parseFloat(productPriceInput.value) || 0;
+      const productCost = parseFloat(productCostInput.value) || 0;
+      const conversionRate = parseFloat(conversionRateInput.value) || 0;
+      const upsellPrice = upsellSwitch.checked ? parseFloat(upsellPriceInput.value) || 0 : 0;
+      const upsellCost = upsellSwitch.checked ? parseFloat(upsellCostInput.value) || 0 : 0;
+      const upsellConversionRate = upsellSwitch.checked ? parseFloat(upsellConversionRateInput.value) || 0 : 0;
+      const callCenterRate = parseFloat(callCenterRateInput.value) || 0;
+      const callCenterCost = parseFloat(callCenterCostInput.value) || 0;
+      const shippingDeliverability = parseFloat(shippingDeliverabilityInput.value) || 0;
+      const shippingCost = parseFloat(shippingCostInput.value) || 0;
+
+      // Perform calculations
+      const adSpend = traffic * cpc;
+      const clicks = traffic * (ctr / 100);
+      const sales = clicks * (conversionRate / 100);
+      const profitPerSale = productPrice - productCost;
+      const upsellSales = sales * (upsellConversionRate / 100);
+      const totalRevenue = (sales * productPrice) + (upsellSales * upsellPrice);
+      const totalCosts = adSpend + (sales * productCost) + (upsellSales * upsellCost) + callCenterCost + shippingCost;
+      const totalProfit = totalRevenue - totalCosts;
+
+      // Display results
+      resultsDiv.innerHTML = '';
+      resultsDiv.innerHTML = `
+        <div class="result">Ad Spend: $${adSpend.toFixed(2)}</div>
+        <div class="result">Clicks: ${clicks.toFixed(2)}</div>
+        <div class="result">Sales: ${sales.toFixed(2)}</div>
+        <div class="result">Profit per Sale: $${profitPerSale.toFixed(2)}</div>
+        ${upsellSwitch.checked ? `<div class="result">Upsell Sales: ${upsellSales.toFixed(2)}</div>` : ''}
+        <div class="result">Total Revenue: $${totalRevenue.toFixed(2)}</div>
+        <div class="result">Total Costs: $${totalCosts.toFixed(2)}</div>
+        <div class="result">Total Profit: $${totalProfit.toFixed(2)}</div>
+      `;
+    }
+
+    document.getElementById('calculate').addEventListener('click', calculateResults);
+  </script>
+
+</body>
+</html>
